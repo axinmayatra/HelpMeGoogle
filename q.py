@@ -1,4 +1,6 @@
 from Tkinter import *
+import urllib2
+import threading
 
 def center(toplevel):
     toplevel.update_idletasks()
@@ -9,21 +11,36 @@ def center(toplevel):
     y = h/2 - size[1]/2
     toplevel.geometry("%dx%d+%d+%d" % (size + (x, y)))
 
-def getDate(event=None):
-	text.insert(INSERT,E1.get()+'\n')
-	text.grid(row=2,column=1,sticky=W)
+def search(q):
+	full_url = "https://suggestqueries.google.com/complete/search?client=firefox&q=";
+	data = urllib2.urlopen(full_url+q)
+	return eval(data.read())[1]
+
+def getDate(a=1,s=1,d=1):
+	def url():
+		if(E1.get() == ''):
+			return
+		s = search(E1.get())
+		text = Text(top,height=len(s),width=20)
+		for x in s :
+			text.insert(INSERT,x+'\n')
+		text.grid(row=2,column=1,sticky=W)
+	t = threading.Thread(target=url)
+	t.start()
 
 top = Tk()
 top.title("Centered!")
+# center(top)
 
-# top.wait_visibility(top)
-E1 = Entry(top, bd =5)
-text = Text(top,height=2,width=20,xscrollcommand=1)
+top.wait_visibility(top)
+top.wm_attributes('-alpha',0.8)
+
+E1 = Entry(top,bd =5)
 
 E1.grid(row=1,column=1)
 
-top.bind('<Return>', getDate)
-top.wm_attributes('-alpha',0.8)
-# center(top)
+# ee.trace('w',getDate)
+# top.bind('<Return>', getDate)
+E1.bind('<Key>', getDate)
 
 top.mainloop()
